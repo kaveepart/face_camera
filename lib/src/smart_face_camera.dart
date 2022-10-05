@@ -370,7 +370,15 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
     cameraController.setFocusPoint(offset);
   }
 
+  bool clickable = true;
   void _onTakePictureButtonPressed() async {
+    if (!clickable) return;
+
+    clickable = false;
+    Future.delayed(Duration(seconds: 2)).then((value) {
+      clickable = true;
+    });
+
     final CameraController? cameraController = _controller;
     try {
       cameraController!.stopImageStream().whenComplete(() async {
@@ -435,21 +443,6 @@ class _SmartFaceCameraState extends State<SmartFaceCamera>
     if (!_alreadyCheckingImage && mounted) {
       _alreadyCheckingImage = true;
       try {
-        await FaceIdentifier.scanImage(
-                cameraImage: cameraImage, camera: cameraController!.description)
-            .then((result) async {
-          setState(() => _detectedFace = result);
-
-          if (result != null) {
-            try {
-              if (widget.autoCapture && result.wellPositioned) {
-                _onTakePictureButtonPressed();
-              }
-            } catch (e) {
-              logError(e.toString());
-            }
-          }
-        });
         _alreadyCheckingImage = false;
       } catch (ex, stack) {
         logError('$ex, $stack');
